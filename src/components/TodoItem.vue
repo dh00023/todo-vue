@@ -5,8 +5,11 @@
 			<div v-if="!editing" @dblclick="editTodo" class="todo-item-label" :class="{ completed : completed }">{{ title }}</div>
 				<input v-else @blur="doneEdit" @keyup.enter="doneEdit" @keyup.escape="cancleEdit" class="todo-item-edit" type="text" v-model="title" v-focus>
 		</div>
-		<div class="remove-item" @click="removeTodo(index)">
-			&times;
+		<div>
+			<button @click="pluralize">Plural</button>
+			<span class="remove-item" @click="removeTodo(index)">
+				&times;
+			</span>	
 		</div>
 	</div>
 </template>
@@ -37,7 +40,12 @@ export default {
 			'beforeEditCache': this.todo.beforeEditCache
 		}
 	},
-
+	created() {
+		window.eventBus.$on('pluralize', this.handlePluralize);
+	},
+	beforeDestory() {
+		window.eventBus.$off('pluralize', this.handlePluralize);
+	},
 	// watch 속성은 데이터 변화를 감지해 자동으로 특정 로직을 수행한다
 	watch: {
 		checkAll() {
@@ -54,7 +62,7 @@ export default {
 	},
 	methods: {
 		removeTodo(index) {
-			this.$emit('removedTodo', index);
+			window.eventBus.$emit('removedTodo', index);
 		},
 		editTodo() {
 			this.beforeEditCache = this.title;
@@ -65,7 +73,7 @@ export default {
 				this.title = this.beforeEditCache;
 			}
 			this.editing = false;
-			this.$emit('finishedEdit', {
+			window.eventBus.$emit('finishedEdit', {
 				'index': this.index,
 				'todo': {
 					'id': this.id,
@@ -78,7 +86,22 @@ export default {
 		cancleEdit() {
 			this.title = this.beforeEditCache;
 			this.editing = false;
-		}
+		},
+		pluralize() {
+			window.eventBus.$emit('pluralize');
+		},
+		handlePluralize(){
+			this.title = this.title + 's';
+			window.eventBus.$emit('finishedEdit', {
+				'index': this.index,
+				'todo': {
+					'id': this.id,
+					'title': this.title,
+					'completed': this.completed,
+					'editing': this.editing
+				}
+			});
+		},
 	}
 }
 </script>
