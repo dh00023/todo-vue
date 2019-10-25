@@ -6,7 +6,7 @@
 				<input v-else @blur="doneEdit" @keyup.enter="doneEdit" @keyup.escape="cancleEdit" class="todo-item-edit" type="text" v-model="title" v-focus>
 		</div>
 		<div>
-			<button @click="pluralize">Plural</button>
+			<button @click="pluralize(todo.id)">Plural</button>
 			<span class="remove-item" @click="removeTodo(todo.id)">
 				&times;
 			</span>	
@@ -58,7 +58,7 @@ export default {
 	},
 	methods: {
 		removeTodo(id) {
-			window.eventBus.$emit('removedTodo', id);
+			this.$store.dispatch('removeTodo', id);
 		},
 		editTodo() {
 			this.beforeEditCache = this.title;
@@ -69,11 +69,11 @@ export default {
 				this.title = this.beforeEditCache;
 			}
 			this.editing = false;
-			window.eventBus.$emit('finishedEdit', {
-				'id': this.id,
-				'title': this.title,
-				'completed': this.completed,
-				'editing': this.editing
+			this.$store.dispatch('completedEdit', {
+					'id': this.id,
+					'title': this.title,
+					'completed': this.completed,
+					'editing': this.editing
 			});
 		},
 		cancleEdit() {
@@ -85,11 +85,11 @@ export default {
 		},
 		handlePluralize(){
 			this.title = this.title + 's';
-			window.eventBus.$emit('finishedEdit', {
-				'id': this.id,
-				'title': this.title,
-				'completed': this.completed,
-				'editing': this.editing
+			this.$store.dispatch('completedEdit', {
+					'id': this.id,
+					'title': this.title,
+					'completed': this.completed,
+					'editing': this.editing
 			});
 		},
 	}
